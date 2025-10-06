@@ -437,6 +437,10 @@ Marco Verdi;Tango intermedio;marco@email.it;Attivo;
         navStack.push(page);
       }
 
+      if (page === 'start') {
+        navStack = ['start'];
+      }
+
       $$('section.card').forEach((section) => {
         section.classList.toggle('active', section.dataset.page === page);
       });
