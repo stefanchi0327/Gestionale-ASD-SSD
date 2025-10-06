@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestionale Scuola di Ballo – Corsi, Allievi, Presenze + Import</title>
+  <style>
+    /* Stili invariati (omessi per brevità) */
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+    <header>
+      <div class="title">Gestionale Scuola di Ballo</div>
+      <nav id="tabs">
+        <button class="btn primary" data-page="start">Inizio</button>
+        <button class="btn" data-page="corsi">Corsi</button>
+        <button class="btn" data-page="allievi">Allievi</button>
+        <button class="btn" data-page="presenze">Presenze</button>
+        <button class="btn" data-page="report">Report</button>
+        <button class="btn" data-page="import">Importa</button>
+      </nav>
+    </header>
+
+    <!-- START PAGE (nuova pagina iniziale con pulsanti azioni rapidi) -->
+    <section class="card" data-page="start">
+      <div class="content">
+        <h2>Benvenuto</h2>
+        <p class="help">Da qui puoi accedere velocemente a tutte le funzioni principali.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px">
+          <button class="btn" data-page="corsi">Gestisci corsi</button>
+          <button class="btn" data-page="allievi">Gestisci allievi</button>
+          <button class="btn" data-page="presenze">Registra presenze</button>
+          <button class="btn" data-page="report">Report presenze</button>
+          <button class="btn" data-page="import">Importa dati</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Altre sezioni (Corsi, Allievi, Presenze, Report, Import) come prima -->
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+  'use strict'
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const toast = (msg) => {const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2400)};
+
+  // Navigazione aggiornata: pagina iniziale è 'start' invece di 'dashboard'
+  let __navStack = ['start'];
+  function navigate(page){
+    const current = __navStack[__navStack.length-1];
+    if(page==='__back'){
+      if(__navStack.length>1){ __navStack.pop(); page = __navStack[__navStack.length-1]; }
+      else { page = 'start'; }
+    } else if(page!==current){ __navStack.push(page); }
+    $$('[data-page]').forEach(p=>p.style.display = p.getAttribute('data-page')===page? '' : 'none');
+    $$('#tabs .btn').forEach(b=> b.classList.toggle('primary', b.getAttribute('data-page')===page));
+  }
+  document.querySelector('#tabs').addEventListener('click', (e)=>{
+    const b=e.target.closest('button[data-page]'); if(!b) return;
+    navigate(b.getAttribute('data-page'));
+  });
+  document.addEventListener('click', (e)=>{
+    const b=e.target.closest('[data-go]'); if(!b) return; navigate(b.getAttribute('data-go'));
+  });
+
+  // Inizializzazione
+  navigate('start');
+  </script>
+</body>
+</html>
