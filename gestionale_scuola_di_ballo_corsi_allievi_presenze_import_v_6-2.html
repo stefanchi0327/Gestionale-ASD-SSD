@@ -5,7 +5,207 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gestionale Scuola di Ballo – Corsi, Allievi, Presenze + Import</title>
   <style>
-    /* Stili invariati (omessi per brevità) */
+    :root {
+      color-scheme: light dark;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f4f6f8;
+      --primary: #2f6fed;
+      --danger: #d43c3c;
+      --surface: #ffffffcc;
+      --text: #0f172a;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #eef2ff, #f5faff);
+      min-height: 100vh;
+      color: var(--text);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1d2355;
+    }
+    #tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      background: #e2e8f0;
+      color: #1f2937;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn.primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 6px 14px -6px rgba(47, 111, 237, 0.7);
+    }
+    .btn.danger {
+      background: var(--danger);
+      color: white;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px -10px rgba(15, 23, 42, 0.3);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.45);
+      display: none;
+    }
+    .card.active {
+      display: block;
+    }
+    .card h2 {
+      margin-top: 0;
+      color: #0f172a;
+    }
+    .help {
+      color: #475569;
+      margin-bottom: 18px;
+    }
+    form {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 600;
+      color: #1f2937;
+    }
+    input, textarea, select {
+      border-radius: 8px;
+      border: 1px solid #cbd5f5;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      background: white;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      color: #1e3a8a;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 18px;
+      color: #64748b;
+      font-style: italic;
+    }
+    .two-columns {
+      display: grid;
+      gap: 16px;
+    }
+    @media (min-width: 720px) {
+      .two-columns {
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+      }
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%) translateY(120%);
+      background: #111827;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 999px;
+      opacity: 0;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+      box-shadow: 0 18px 38px -20px rgba(0,0,0,0.45);
+      z-index: 20;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      font-size: 0.8rem;
+      color: #374151;
+    }
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+    .import-grid {
+      display: grid;
+      gap: 16px;
+    }
+    @media (min-width: 900px) {
+      .import-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+    }
   </style>
 </head>
 <body>
@@ -22,51 +222,664 @@
       </nav>
     </header>
 
-    <!-- START PAGE (nuova pagina iniziale con pulsanti azioni rapidi) -->
-    <section class="card" data-page="start">
-      <div class="content">
-        <h2>Benvenuto</h2>
-        <p class="help">Da qui puoi accedere velocemente a tutte le funzioni principali.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px">
-          <button class="btn" data-page="corsi">Gestisci corsi</button>
-          <button class="btn" data-page="allievi">Gestisci allievi</button>
-          <button class="btn" data-page="presenze">Registra presenze</button>
-          <button class="btn" data-page="report">Report presenze</button>
-          <button class="btn" data-page="import">Importa dati</button>
+    <main>
+      <!-- START PAGE (pagina di atterraggio) -->
+      <section class="card active" data-page="start">
+        <button class="btn back-button" data-go="__back">⬅ Torna alla schermata precedente</button>
+        <div class="content">
+          <h2>Benvenuto</h2>
+          <p class="help">Da qui puoi accedere rapidamente alle funzioni principali del gestionale.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px">
+            <button class="btn" data-page="corsi">Gestisci corsi</button>
+            <button class="btn" data-page="allievi">Gestisci allievi</button>
+            <button class="btn" data-page="presenze">Registra presenze</button>
+            <button class="btn" data-page="report">Report presenze</button>
+            <button class="btn" data-page="import">Importa dati</button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Altre sezioni (Corsi, Allievi, Presenze, Report, Import) come prima -->
+      <!-- CORSI -->
+      <section class="card" data-page="corsi">
+        <button class="btn back-button" data-go="__back">⬅ Torna alla schermata precedente</button>
+        <h2>Corsi</h2>
+        <p class="help">Gestisci l'offerta formativa: aggiungi, modifica o elimina i corsi disponibili.</p>
+        <form id="courseForm">
+          <input type="hidden" name="index" />
+          <div class="two-columns">
+            <label>
+              Nome corso
+              <input name="nome" required placeholder="Es. Salsa principianti" />
+            </label>
+            <label>
+              Insegnante
+              <input name="insegnante" required placeholder="Es. Mario Rossi" />
+            </label>
+            <label>
+              Giorni / Orario
+              <input name="orario" required placeholder="Es. Martedì 20:00" />
+            </label>
+            <label>
+              Livello
+              <select name="livello">
+                <option value="Principianti">Principianti</option>
+                <option value="Intermedio">Intermedio</option>
+                <option value="Avanzato">Avanzato</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            Descrizione
+            <textarea name="descrizione" placeholder="Informazioni aggiuntive sul corso"></textarea>
+          </label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn primary" type="submit">Salva corso</button>
+            <button class="btn" type="reset" data-reset-form="courseForm">Annulla modifica</button>
+          </div>
+        </form>
+        <div id="coursesList" class="stack"></div>
+      </section>
+
+      <!-- ALLIEVI -->
+      <section class="card" data-page="allievi">
+        <button class="btn back-button" data-go="__back">⬅ Torna alla schermata precedente</button>
+        <h2>Allievi</h2>
+        <p class="help">Anagrafica degli iscritti. Puoi aggiungere, modificare i dati e collegarli ai corsi attivi.</p>
+        <form id="studentForm">
+          <input type="hidden" name="index" />
+          <div class="two-columns">
+            <label>Nome e cognome
+              <input name="nome" required placeholder="Es. Laura Bianchi" />
+            </label>
+            <label>Corso
+              <select name="corso" required></select>
+            </label>
+            <label>Contatto (telefono/email)
+              <input name="contatto" placeholder="Es. 3201234567 / laura@email.it" />
+            </label>
+            <label>Stato iscrizione
+              <select name="stato">
+                <option value="Attivo">Attivo</option>
+                <option value="Sospeso">Sospeso</option>
+                <option value="In attesa">In attesa</option>
+              </select>
+            </label>
+          </div>
+          <label>Note
+            <textarea name="note" placeholder="Annotazioni utili (documenti consegnati, certificato medico, ecc.)"></textarea>
+          </label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn primary" type="submit">Salva allievo</button>
+            <button class="btn" type="reset" data-reset-form="studentForm">Annulla modifica</button>
+          </div>
+        </form>
+        <div id="studentsList" class="stack"></div>
+      </section>
+
+      <!-- PRESENZE -->
+      <section class="card" data-page="presenze">
+        <button class="btn back-button" data-go="__back">⬅ Torna alla schermata precedente</button>
+        <h2>Presenze</h2>
+        <p class="help">Registra la partecipazione degli allievi ai corsi. Il riepilogo è disponibile nella sezione Report.</p>
+        <form id="attendanceForm">
+          <div class="two-columns">
+            <label>Data
+              <input name="data" type="date" required />
+            </label>
+            <label>Corso
+              <select name="corso" required></select>
+            </label>
+            <label>Allievo
+              <select name="allievo" required></select>
+            </label>
+            <label>Stato presenza
+              <select name="stato">
+                <option value="Presente">Presente</option>
+                <option value="Assente">Assente</option>
+              </select>
+            </label>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn primary" type="submit">Registra</button>
+            <button class="btn" type="reset">Svuota</button>
+          </div>
+        </form>
+        <div id="attendanceList" class="stack"></div>
+      </section>
+
+      <!-- REPORT -->
+      <section class="card" data-page="report">
+        <button class="btn back-button" data-go="__back">⬅ Torna alla schermata precedente</button>
+        <h2>Report presenze</h2>
+        <p class="help">Statistiche rapide sul numero di lezioni frequentate e assenze per ogni allievo.</p>
+        <div id="reportContent" class="stack"></div>
+      </section>
+
+      <!-- IMPORT -->
+      <section class="card" data-page="import">
+        <button class="btn back-button" data-go="__back">⬅ Torna alla schermata precedente</button>
+        <h2>Importazione dati</h2>
+        <p class="help">Carica corsi e allievi da un file <strong>.json</strong> o <strong>.csv</strong>. I dati importati vengono automaticamente sincronizzati con le sezioni dedicate.</p>
+        <div class="import-grid">
+          <div class="stack">
+            <label class="btn" style="justify-content:center;">
+              📁 Seleziona file da importare
+              <input id="importFile" type="file" accept=".json,.csv" style="display:none" />
+            </label>
+            <textarea id="importRaw" placeholder="Oppure incolla qui i dati (JSON o CSV)"></textarea>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button class="btn primary" id="importBtn">Importa dati</button>
+              <button class="btn" id="clearImport">Svuota</button>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="card" style="display:block;padding:16px;background:white">
+              <h3 style="margin-top:0">Formato JSON supportato</h3>
+              <pre style="background:#0f172a;color:#f1f5f9;padding:14px;border-radius:12px;overflow:auto;max-height:220px;">
+{
+  "corsi": [
+    {
+      "nome": "Salsa principianti",
+      "insegnante": "Mario Rossi",
+      "orario": "Martedì 20:00",
+      "livello": "Principianti",
+      "descrizione": "Le basi della salsa cubana"
+    }
+  ],
+  "allievi": [
+    {
+      "nome": "Laura Bianchi",
+      "corso": "Salsa principianti",
+      "contatto": "3201234567",
+      "stato": "Attivo",
+      "note": "Certificato medico consegnato"
+    }
+  ]
+}
+              </pre>
+              <h3>Esempio CSV (Allievi)</h3>
+              <pre style="background:#0f172a;color:#f1f5f9;padding:14px;border-radius:12px;overflow:auto;max-height:160px;">
+nome;corso;contatto;stato;note
+Laura Bianchi;Salsa principianti;3201234567;Attivo;Certificato medico consegnato
+Marco Verdi;Tango intermedio;marco@email.it;Attivo;
+              </pre>
+              <p class="help">Se il corso indicato non esiste viene creato automaticamente.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
   <div class="toast" id="toast"></div>
   <script>
-  'use strict'
-  const $ = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-  const toast = (msg) => {const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2400)};
+    'use strict';
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const toast = (msg) => {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+    };
 
-  // Navigazione aggiornata: pagina iniziale è 'start' invece di 'dashboard'
-  let __navStack = ['start'];
-  function navigate(page){
-    const current = __navStack[__navStack.length-1];
-    if(page==='__back'){
-      if(__navStack.length>1){ __navStack.pop(); page = __navStack[__navStack.length-1]; }
-      else { page = 'start'; }
-    } else if(page!==current){ __navStack.push(page); }
-    $$('[data-page]').forEach(p=>p.style.display = p.getAttribute('data-page')===page? '' : 'none');
-    $$('#tabs .btn').forEach(b=> b.classList.toggle('primary', b.getAttribute('data-page')===page));
-  }
-  document.querySelector('#tabs').addEventListener('click', (e)=>{
-    const b=e.target.closest('button[data-page]'); if(!b) return;
-    navigate(b.getAttribute('data-page'));
-  });
-  document.addEventListener('click', (e)=>{
-    const b=e.target.closest('[data-go]'); if(!b) return; navigate(b.getAttribute('data-go'));
-  });
+    let navStack = ['start'];
+    function navigate(page) {
+      const current = navStack[navStack.length - 1];
+      if (page === '__back') {
+        if (navStack.length > 1) {
+          navStack.pop();
+          page = navStack[navStack.length - 1];
+        } else {
+          page = 'start';
+        }
+      } else if (page !== current) {
+        navStack.push(page);
+      }
 
-  // Inizializzazione
-  navigate('start');
+      if (page === 'start') {
+        navStack = ['start'];
+      }
+
+      $$('section.card').forEach((section) => {
+        section.classList.toggle('active', section.dataset.page === page);
+      });
+      $$('#tabs .btn').forEach((btn) => {
+        btn.classList.toggle('primary', btn.dataset.page === page);
+      });
+      updateBackButtons();
+    }
+
+    function updateBackButtons() {
+      const show = navStack.length > 1;
+      $$('.back-button').forEach((btn) => {
+        btn.style.visibility = show ? 'visible' : 'hidden';
+      });
+    }
+
+    $('#tabs').addEventListener('click', (event) => {
+      const btn = event.target.closest('button[data-page]');
+      if (!btn) return;
+      navigate(btn.dataset.page);
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target.closest('[data-go]');
+      if (!target) return;
+      navigate(target.dataset.go);
+    });
+
+    // Stato applicazione
+    let courses = [
+      {
+        nome: 'Salsa principianti',
+        insegnante: 'Mario Rossi',
+        orario: 'Martedì 20:00',
+        livello: 'Principianti',
+        descrizione: 'Le basi della salsa cubana.'
+      },
+      {
+        nome: 'Tango intermedio',
+        insegnante: 'Ana Torres',
+        orario: 'Giovedì 21:00',
+        livello: 'Intermedio',
+        descrizione: 'Tecniche e musicalità per coppie intermedie.'
+      }
+    ];
+
+    let students = [
+      {
+        nome: 'Laura Bianchi',
+        corso: 'Salsa principianti',
+        contatto: '3201234567',
+        stato: 'Attivo',
+        note: 'Certificato medico consegnato.'
+      }
+    ];
+
+    let attendance = [];
+
+    // Utility di rendering
+    function renderCourses() {
+      const list = $('#coursesList');
+      if (!courses.length) {
+        list.innerHTML = '<div class="empty-state">Nessun corso registrato. Aggiungine uno con il modulo qui sopra.</div>';
+        refreshCourseOptions();
+        return;
+      }
+      list.innerHTML = courses
+        .map((course, index) => `
+          <div class="card" style="display:block;padding:18px;background:white">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+              <div>
+                <h3 style="margin:0 0 8px">${course.nome}</h3>
+                <div class="pill">${course.livello}</div>
+                <p style="margin:12px 0 6px;color:#1f2937"><strong>Insegnante:</strong> ${course.insegnante}</p>
+                <p style="margin:4px 0;color:#1f2937"><strong>Giorni / Orario:</strong> ${course.orario}</p>
+                ${course.descrizione ? `<p style="margin:10px 0 0;color:#475569">${course.descrizione}</p>` : ''}
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn" data-edit-course="${index}">✏️ Modifica</button>
+                <button class="btn danger" data-delete-course="${index}">🗑 Elimina</button>
+              </div>
+            </div>
+          </div>
+        `)
+        .join('');
+      refreshCourseOptions();
+    }
+
+    function renderStudents() {
+      const list = $('#studentsList');
+      if (!students.length) {
+        list.innerHTML = '<div class="empty-state">Ancora nessun allievo registrato. Aggiungine uno dal modulo.</div>';
+        refreshAttendanceOptions();
+        return;
+      }
+      list.innerHTML = students
+        .map((student, index) => `
+          <div class="card" style="display:block;padding:18px;background:white">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+              <div>
+                <h3 style="margin:0 0 8px">${student.nome}</h3>
+                <p style="margin:4px 0;color:#1f2937"><strong>Corso:</strong> ${student.corso}</p>
+                ${student.contatto ? `<p style="margin:4px 0;color:#1f2937"><strong>Contatto:</strong> ${student.contatto}</p>` : ''}
+                <div class="pill">${student.stato}</div>
+                ${student.note ? `<p style="margin:10px 0 0;color:#475569">${student.note}</p>` : ''}
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn" data-edit-student="${index}">✏️ Modifica</button>
+                <button class="btn danger" data-delete-student="${index}">🗑 Elimina</button>
+              </div>
+            </div>
+          </div>
+        `)
+        .join('');
+      refreshAttendanceOptions();
+    }
+
+    function renderAttendance() {
+      const list = $('#attendanceList');
+      if (!attendance.length) {
+        list.innerHTML = '<div class="empty-state">Nessuna presenza registrata.</div>';
+        renderReport();
+        return;
+      }
+      list.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Corso</th>
+              <th>Allievo</th>
+              <th>Stato</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${attendance
+              .map((entry) => `
+                <tr>
+                  <td>${entry.data}</td>
+                  <td>${entry.corso}</td>
+                  <td>${entry.allievo}</td>
+                  <td>${entry.stato}</td>
+                </tr>
+              `)
+              .join('')}
+          </tbody>
+        </table>
+      `;
+      renderReport();
+    }
+
+    function renderReport() {
+      const container = $('#reportContent');
+      if (!attendance.length) {
+        container.innerHTML = '<div class="empty-state">Registra alcune presenze per visualizzare il report.</div>';
+        return;
+      }
+      const summary = attendance.reduce((acc, entry) => {
+        const key = entry.allievo;
+        if (!acc[key]) {
+          acc[key] = { presente: 0, assente: 0 };
+        }
+        acc[key][entry.stato === 'Presente' ? 'presente' : 'assente'] += 1;
+        return acc;
+      }, {});
+
+      container.innerHTML = Object.entries(summary)
+        .map(([name, data]) => `
+          <div class="card" style="display:block;padding:18px;background:white">
+            <h3 style="margin-top:0">${name}</h3>
+            <p style="margin:4px 0"><strong>Presenze:</strong> ${data.presente}</p>
+            <p style="margin:4px 0"><strong>Assenze:</strong> ${data.assente}</p>
+          </div>
+        `)
+        .join('');
+    }
+
+    function refreshCourseOptions() {
+      const selects = $$('select[name="corso"]');
+      selects.forEach((select) => {
+        const current = select.value;
+        select.innerHTML = courses
+          .map((course) => `<option value="${course.nome}">${course.nome}</option>`)
+          .join('');
+        if (courses.some((course) => course.nome === current)) {
+          select.value = current;
+        }
+      });
+    }
+
+    function refreshAttendanceOptions() {
+      const courseSelect = $('#attendanceForm select[name="corso"]');
+      const studentSelect = $('#attendanceForm select[name="allievo"]');
+      if (!courseSelect || !studentSelect) return;
+
+      courseSelect.innerHTML = courses
+        .map((course) => `<option value="${course.nome}">${course.nome}</option>`)
+        .join('');
+      studentSelect.innerHTML = students
+        .map((student) => `<option value="${student.nome}">${student.nome}</option>`)
+        .join('');
+    }
+
+    // Gestione corsi
+    $('#courseForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const data = Object.fromEntries(new FormData(form));
+      const index = data.index !== '' ? Number(data.index) : null;
+      delete data.index;
+      if (index !== null) {
+        courses[index] = data;
+        toast('Corso aggiornato correttamente');
+      } else {
+        courses.push(data);
+        toast('Nuovo corso aggiunto');
+      }
+      form.reset();
+      renderCourses();
+    });
+
+    $('#courseForm').addEventListener('reset', (event) => {
+      const formId = event.target.dataset.resetForm;
+      if (!formId) return;
+      const form = document.getElementById(formId);
+      if (form) {
+        form.querySelector('input[name="index"]').value = '';
+      }
+    });
+
+    $('#coursesList').addEventListener('click', (event) => {
+      const edit = event.target.closest('[data-edit-course]');
+      const remove = event.target.closest('[data-delete-course]');
+      if (edit) {
+        const index = Number(edit.dataset.editCourse);
+        const course = courses[index];
+        const form = $('#courseForm');
+        form.nome.value = course.nome;
+        form.insegnante.value = course.insegnante;
+        form.orario.value = course.orario;
+        form.livello.value = course.livello;
+        form.descrizione.value = course.descrizione || '';
+        form.index.value = index;
+        toast('Modifica il corso e salva per confermare');
+        return;
+      }
+      if (remove) {
+        const index = Number(remove.dataset.deleteCourse);
+        const confirmed = confirm('Eliminare il corso selezionato?');
+        if (!confirmed) return;
+        const courseName = courses[index].nome;
+        courses.splice(index, 1);
+        students = students.map((student) => (
+          student.corso === courseName ? { ...student, corso: '' } : student
+        ));
+        toast('Corso eliminato');
+        renderCourses();
+        renderStudents();
+      }
+    });
+
+    // Gestione allievi
+    $('#studentForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const data = Object.fromEntries(new FormData(form));
+      const index = data.index !== '' ? Number(data.index) : null;
+      delete data.index;
+      if (index !== null) {
+        students[index] = data;
+        toast('Anagrafica allievo aggiornata');
+      } else {
+        students.push(data);
+        toast('Nuovo allievo registrato');
+      }
+      form.reset();
+      renderStudents();
+    });
+
+    $('#studentForm').addEventListener('reset', (event) => {
+      const formId = event.target.dataset.resetForm;
+      if (!formId) return;
+      const form = document.getElementById(formId);
+      if (form) {
+        form.querySelector('input[name="index"]').value = '';
+      }
+    });
+
+    $('#studentsList').addEventListener('click', (event) => {
+      const edit = event.target.closest('[data-edit-student]');
+      const remove = event.target.closest('[data-delete-student]');
+      if (edit) {
+        const index = Number(edit.dataset.editStudent);
+        const student = students[index];
+        const form = $('#studentForm');
+        form.nome.value = student.nome;
+        refreshCourseOptions();
+        form.corso.value = student.corso;
+        form.contatto.value = student.contatto || '';
+        form.stato.value = student.stato;
+        form.note.value = student.note || '';
+        form.index.value = index;
+        toast('Modifica i dati e salva per confermare');
+        return;
+      }
+      if (remove) {
+        const index = Number(remove.dataset.deleteStudent);
+        if (!confirm('Eliminare definitivamente l\'allievo?')) return;
+        students.splice(index, 1);
+        toast('Allievo eliminato');
+        renderStudents();
+      }
+    });
+
+    // Gestione presenze
+    $('#attendanceForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const data = Object.fromEntries(new FormData(form));
+      attendance.push(data);
+      form.reset();
+      renderAttendance();
+      toast('Presenza registrata');
+    });
+
+    // Import dati
+    $('#importFile').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        $('#importRaw').value = ev.target.result;
+        toast('File caricato, verifica e premi Importa dati');
+      };
+      reader.readAsText(file, 'utf-8');
+    });
+
+    $('#clearImport').addEventListener('click', () => {
+      $('#importRaw').value = '';
+      $('#importFile').value = '';
+    });
+
+    $('#importBtn').addEventListener('click', () => {
+      const raw = $('#importRaw').value.trim();
+      if (!raw) {
+        toast('Nessun dato da importare');
+        return;
+      }
+      try {
+        if (raw.startsWith('{')) {
+          const payload = JSON.parse(raw);
+          if (Array.isArray(payload.corsi)) {
+            courses = payload.corsi.map((course) => ({
+              nome: course.nome || 'Corso senza nome',
+              insegnante: course.insegnante || '—',
+              orario: course.orario || '',
+              livello: course.livello || 'Principianti',
+              descrizione: course.descrizione || ''
+            }));
+          }
+          if (Array.isArray(payload.allievi)) {
+            const availableCourses = new Set(courses.map((course) => course.nome));
+            students = payload.allievi.map((student) => {
+              if (student.corso && !availableCourses.has(student.corso)) {
+                const newCourse = {
+                  nome: student.corso,
+                  insegnante: 'Da assegnare',
+                  orario: '',
+                  livello: 'Principianti',
+                  descrizione: ''
+                };
+                courses.push(newCourse);
+                availableCourses.add(student.corso);
+              }
+              return {
+                nome: student.nome || 'Allievo senza nome',
+                corso: student.corso || '',
+                contatto: student.contatto || '',
+                stato: student.stato || 'Attivo',
+                note: student.note || ''
+              };
+            });
+          }
+        } else {
+          // CSV -> solo allievi
+          const rows = raw.split(/\r?\n/).map((row) => row.trim()).filter(Boolean);
+          const [headerLine, ...dataRows] = rows;
+          const headers = headerLine.split(/[,;\t]/).map((h) => h.trim().toLowerCase());
+          const find = (field) => headers.indexOf(field);
+          const idx = {
+            nome: find('nome'),
+            corso: find('corso'),
+            contatto: find('contatto'),
+            stato: find('stato'),
+            note: find('note')
+          };
+          const parsed = dataRows.map((row) => {
+            const cols = row.split(/[,;\t]/);
+            return {
+              nome: cols[idx.nome] || 'Allievo senza nome',
+              corso: cols[idx.corso] || '',
+              contatto: idx.contatto >= 0 ? cols[idx.contatto] : '',
+              stato: idx.stato >= 0 ? cols[idx.stato] : 'Attivo',
+              note: idx.note >= 0 ? cols[idx.note] : ''
+            };
+          });
+          parsed.forEach((student) => {
+            if (student.corso && !courses.some((course) => course.nome === student.corso)) {
+              courses.push({
+                nome: student.corso,
+                insegnante: 'Da assegnare',
+                orario: '',
+                livello: 'Principianti',
+                descrizione: ''
+              });
+            }
+          });
+          students = parsed;
+        }
+        toast('Dati importati correttamente');
+        $('#importRaw').value = '';
+        $('#importFile').value = '';
+        renderCourses();
+        renderStudents();
+        renderAttendance();
+      } catch (error) {
+        console.error(error);
+        toast('Errore durante l\'importazione: controlla il formato');
+      }
+    });
+
+    // Inizializzazione
+    renderCourses();
+    renderStudents();
+    renderAttendance();
+    refreshCourseOptions();
+    refreshAttendanceOptions();
+    updateBackButtons();
+    navigate('start');
   </script>
 </body>
 </html>
